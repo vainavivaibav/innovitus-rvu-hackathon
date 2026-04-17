@@ -1,6 +1,9 @@
 from fastapi import FastAPI
 import pandas as pd
 
+from backend.services.gmaps_service import get_route_data
+from backend.services.weather_service import get_weather_risk
+
 from backend.data.loader import load_data
 from backend.data.preprocess import preprocess
 
@@ -52,10 +55,24 @@ def inventory():
 @app.get("/optimize")
 def optimize():
     best = select_best_supplier(df)
+
+    # Existing logic
     route = route_info(best)
     emission = calculate_emission(best['distance_km'], best['CO2_per_km'])
 
-    return {"supplier": best['supplier_location'], "route": route, "emission": emission}
+    # NEW APIs
+    gmaps = get_route_data()
+    weather = get_weather_risk()
+
+    return {
+        "supplier": best['supplier_location'],
+        "route": route,
+        "emission": emission,
+
+        # NEW DATA
+        "gmaps": gmaps,
+        "weather": weather
+    }
 
 @app.get("/decision")
 def decision():

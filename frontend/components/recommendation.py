@@ -12,8 +12,8 @@ def show_recommendation(run, delay):
 
         st.write(f"Supplier: {res['supplier']}")
         st.write(f"Route Distance: {res['route']['distance']} km")
-        st.write(f"Time: {res['route']['time']}")
-        st.write(f"CO₂: {res['emission']}")
+        st.write(f"Time: {round(res['route']['time'], 2)} hrs")
+        st.write(f"CO₂: {round(res['emission'], 2)} kg")
 
         if delay > 70:
             st.error("Switch supplier or route")

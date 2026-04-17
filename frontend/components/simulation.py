@@ -1,5 +1,7 @@
 import requests
 
+import random
+
 BASE_URL = "http://127.0.0.1:8000"
 
 def simulate(inputs):
@@ -7,6 +9,9 @@ def simulate(inputs):
     # Demand
     demand_res = requests.post(f"{BASE_URL}/predict-demand").json()
     demand = demand_res["predicted_demand"]
+
+    # 🔥 ADD THIS LINE HERE
+    demand = [x * 10 for x in demand]
 
     # Delay
     delay_res = requests.post(f"{BASE_URL}/predict-delay").json()
