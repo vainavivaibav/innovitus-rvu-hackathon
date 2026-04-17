@@ -1,13 +1,12 @@
 import streamlit as st
-import numpy as np
+import requests
+
+BASE_URL = "http://127.0.0.1:8000"
 
 def show_traffic(run):
+
     st.subheader("Traffic Insights")
 
     if run:
-        traffic = np.random.randint(50,200,10)
-        st.line_chart(traffic)
-
-        if max(traffic) > 180:
-            st.warning("High activity detected")
-            st.info("Possible demand spike due to traffic surge")
+        res = requests.get(f"{BASE_URL}/traffic-insights").json()
+        st.info(res["insight"])

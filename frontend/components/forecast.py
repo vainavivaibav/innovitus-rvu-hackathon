@@ -6,7 +6,10 @@ def show_forecast(run, demand):
     st.subheader("Demand Forecast")
 
     if run:
-        df = pd.DataFrame({"Day": range(1,8), "Demand": demand})
+        df = pd.DataFrame({
+    "Day": range(1, len(demand) + 1),
+    "Demand": demand
+})
         st.line_chart(df.set_index("Day"))
 
         if np.mean(demand) > 150:

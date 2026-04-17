@@ -1,2 +1,2 @@
-DATA_PATH = "dataco.csv"
-LOG_PATH = "access_logs.csv"
+DATA_PATH = "datasets/dataset1.csv"
+LOG_PATH = "datasets/dataset2.csv"
