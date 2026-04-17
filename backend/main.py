@@ -17,6 +17,25 @@ from backend.services.sustainability import calculate_emission
 from backend.services.traffic import detect_spike
 from backend.services.decision import make_decision
 
+def get_filtered_sample(data):
+    region_map = {
+        "South": "South Asia",
+        "North": "US"
+    }
+
+    sample = df.sample(10)
+
+    if data and "region" in data:
+        mapped_region = region_map.get(data["region"])
+
+        if mapped_region:
+            filtered = df[df["Order Region"] == mapped_region]
+
+            if len(filtered) > 0:
+                sample = filtered.sample(min(10, len(filtered)))
+
+    return sample
+
 app = FastAPI(title="AI Supply Chain API")
 
 # Load + preprocess
@@ -33,34 +52,34 @@ def home():
     return {"message": "API running"}
 
 @app.post("/predict-demand")
-def demand():
-    sample = df[df["Order Region"] == "South Asia"].head(20)
+def demand(data: dict):
+    sample = get_filtered_sample(data)
     return {"predicted_demand": predict_demand(demand_model, d_cols, sample)}
 
 @app.post("/predict-delay")
-def delay():
-    sample = df[df["Order Region"] == "South Asia"].head(20)
+def delay(data: dict):
+    sample = get_filtered_sample(data)
     return {"predicted_delay": predict_delay(delay_model, l_cols, sample)}
 
-@app.get("/inventory-status")
-def inventory():
-    sample = df[df["Order Region"] == "South Asia"].head(20)
-    demand = predict_demand(demand_model, d_cols, sample)
+@app.post("/inventory-status")
+def inventory(data: dict):
+    sample = get_filtered_sample(data)
 
+    demand = predict_demand(demand_model, d_cols, sample)
     reorder = reorder_point(demand, 3, 50)
     status = inventory_status(200, reorder)
 
     return {"stock": 200, "reorder": reorder, "status": status}
 
-@app.get("/optimize")
-def optimize():
-    best = select_best_supplier(df)
+@app.post("/optimize")
+def optimize(data: dict):
+    sample = get_filtered_sample(data)
 
-    # Existing logic
+    best = select_best_supplier(sample)
+
     route = route_info(best)
     emission = calculate_emission(best['distance_km'], best['CO2_per_km'])
 
-    # NEW APIs
     gmaps = get_route_data()
     weather = get_weather_risk()
 
@@ -68,15 +87,13 @@ def optimize():
         "supplier": best['supplier_location'],
         "route": route,
         "emission": emission,
-
-        # NEW DATA
         "gmaps": gmaps,
         "weather": weather
     }
 
-@app.get("/decision")
-def decision():
-    sample = df[df["Order Region"] == "South Asia"].head(20)
+@app.post("/decision")
+def decision(data: dict):
+    sample = get_filtered_sample(data)
 
     demand = predict_demand(demand_model, d_cols, sample)[0]
     delay = predict_delay(delay_model, l_cols, sample)[0]

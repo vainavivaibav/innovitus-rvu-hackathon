@@ -4,6 +4,7 @@ import psycopg2
 
 engine = create_engine("postgresql://postgres:root@localhost:5432/supplychain")
 
+
 pd.concat([
     pd.read_csv("database/dataset1.csv"),
     pd.read_csv("database/dataset2.csv"),
