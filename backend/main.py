@@ -20,19 +20,22 @@ from backend.services.decision import make_decision
 def get_filtered_sample(data):
     region_map = {
         "South": "South Asia",
-        "North": "US"
+        "North": "North"
     }
 
-    sample = df.sample(10)
+    sample = df.copy()
 
     if data and "region" in data:
         mapped_region = region_map.get(data["region"])
 
         if mapped_region:
-            filtered = df[df["Order Region"] == mapped_region]
+            sample = df[df["order_region"] == mapped_region]
 
-            if len(filtered) > 0:
-                sample = filtered.sample(min(10, len(filtered)))
+    if len(sample) == 0:
+        sample = df.copy()
+
+    seed = hash(str(data)) % (2**32)
+    sample = sample.sample(min(10, len(sample)), random_state=seed)
 
     return sample
 
@@ -91,17 +94,25 @@ def optimize(data: dict):
         "weather": weather
     }
 
-@app.post("/decision")
-def decision(data: dict):
+@app.post("/optimize")
+def optimize(data: dict):
     sample = get_filtered_sample(data)
 
-    demand = predict_demand(demand_model, d_cols, sample)[0]
-    delay = predict_delay(delay_model, l_cols, sample)[0]
+    best = select_best_supplier(sample)
 
-    reorder = reorder_point([demand], 3, 50)
-    status = inventory_status(200, reorder)
+    route = route_info(best)
+    emission = calculate_emission(best['distance_km'], best['co2_per_km'])
 
-    return {"decision": make_decision(demand, delay, status)}
+    gmaps = get_route_data()
+    weather = get_weather_risk()
+
+    return {
+        "supplier": best['supplier_location'],
+        "route": route,
+        "emission": emission,
+        "gmaps": gmaps,
+        "weather": weather
+    }
 
 @app.get("/traffic-insights")
 def traffic():

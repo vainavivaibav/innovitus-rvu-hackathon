@@ -1,13 +1,14 @@
+from sqlalchemy import create_engine
 import pandas as pd
-from backend.config import DATA_PATH, LOG_PATH
+
+engine = create_engine("postgresql://postgres:root@localhost:5432/supplychain")
 
 def load_data():
-    df = pd.read_csv(DATA_PATH)
-    log_df = pd.read_csv(LOG_PATH)
-    return df, log_df
+    df = pd.read_sql("SELECT * FROM supply_data", engine)
 
-def load_data():
-    df = pd.read_csv(DATA_PATH)
-    log_df = pd.read_csv(LOG_PATH)
-    return df, log_df
+    try:
+        log_df = pd.read_sql("SELECT * FROM access_logs", engine)
+    except:
+        log_df = pd.DataFrame()
 
+    return df, log_df

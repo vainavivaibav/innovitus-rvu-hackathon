@@ -1,15 +1,15 @@
 import pandas as pd
 
 def preprocess(df):
-    df = df.fillna(0)
+    df.columns = df.columns.str.strip().str.lower()
 
-    df['order date (DateOrders)'] = pd.to_datetime(df['order date (DateOrders)'])
-    df['shipping date (DateOrders)'] = pd.to_datetime(df['shipping date (DateOrders)'])
+    df['order_date_(dateorders)'] = pd.to_datetime(df['order_date_(dateorders)'])
+    df['shipping_date_(dateorders)'] = pd.to_datetime(df['shipping_date_(dateorders)'])
 
-    df['order_day'] = df['order date (DateOrders)'].dt.day
-    df['order_month'] = df['order date (DateOrders)'].dt.month
-    df['order_hour'] = df['order date (DateOrders)'].dt.hour
+    df['order_day'] = df['order_date_(dateorders)'].dt.day
+    df['order_month'] = df['order_date_(dateorders)'].dt.month
+    df['order_hour'] = df['order_date_(dateorders)'].dt.hour
 
-    df['delay'] = df['Days for shipping (real)'] - df['Days for shipment (scheduled)']
+    df['delay'] = df['days_for_shipping_(real)'] - df['days_for_shipment_(scheduled)']
 
     return df

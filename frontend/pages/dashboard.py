@@ -37,12 +37,18 @@ def dashboard_page():
             show_inventory(run, inventory if run else None, reorder if run else None)
 
         with colB:
-            show_recommendation(run, delay_prob if run else None)
+            show_recommendation(run, delay_prob if run else 0, inputs)
 
         show_map(run, delay_prob if run else None)
         show_optimization()
         show_sustainability(run)
         show_traffic(run)
         show_alerts(run, delay_prob if run else None, inventory if run else None, reorder if run else None, demand if run else None)
-        show_decision(run, delay_prob if run else None, inventory if run else None, reorder if run else None)
+        show_decision(
+                run,
+                delay_prob if run else 0,
+                inventory if run else None,
+                reorder if run else None,
+                inputs
+            )
 
