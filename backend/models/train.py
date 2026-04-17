@@ -15,7 +15,11 @@ def train_models(df):
     X_demand = pd.get_dummies(df[features_demand])
     y_demand = df['order_item_quantity']
 
-    demand_model = XGBRegressor(n_estimators=50)
+    demand_model = XGBRegressor(
+        n_estimators=100,
+        max_depth=6,
+        learning_rate=0.1
+    )
     demand_model.fit(X_demand, y_demand)
 
     features_delay = [
@@ -24,13 +28,20 @@ def train_models(df):
         'order_region',
         'order_status',
         'latitude',
-        'longitude'
+        'longitude',
+        'delay'
     ]
 
     X_delay = pd.get_dummies(df[features_delay])
     y_delay = df['late_delivery_risk']
 
-    delay_model = XGBClassifier()
+    delay_model = XGBClassifier(
+        n_estimators=100,
+        max_depth=6,
+        learning_rate=0.1,
+        use_label_encoder=False,
+        eval_metric='logloss'
+    )
     delay_model.fit(X_delay, y_delay)
 
     return demand_model, delay_model, X_demand.columns, X_delay.columns
